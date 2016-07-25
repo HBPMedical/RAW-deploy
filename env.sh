@@ -1,12 +1,13 @@
 #!/bin/sh
-export docker_network=mip-bundle
-export docker_data_folder="${PWD}/data"
-export container_data_folder="/datasets"
-#export port_raw_engine=54321
-#export port_raw_sniffer=5555
+# Node-specific config:
+: ${raw_data_root:="${PWD}/data"}
+: ${raw_admin_root:="${PWD}/raw-admin"}
+export raw_data_root raw_admin_root
 
-export raw_admin_static=${PWD}/raw-admin/static
-export raw_admin_conf=${PWD}/raw-admin/conf
-export raw_admin_log=${PWD}/raw-admin/logs
+# Whole Swarm config
+export COMPOSE_PROJECT_NAME="mip"
+export docker_data_folder="/datasets"
 
-export docker_ip=$(ip addr | awk '/inet/ && /docker0/{sub(/\/.*$/,"",$2); print $2}')
+export raw_admin_static=${raw_admin_root}/static
+export raw_admin_conf=${raw_admin_root}/conf
+export raw_admin_log=${raw_admin_root}/logs

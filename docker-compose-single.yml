@@ -1,0 +1,64 @@
+version: '2'
+# the following environment variables are expected to be available when running 
+# docker-compose up
+# - raw_data_root: The folder containing the data on the swarm node host
+# - docker_data_folder: Where to map the data folder WITHIN the containers
+# - raw_admin_static: Nginx directory for the static pages and ressources
+# - raw_admin_conf: Nginx configuration directory
+# - raw_admin_log: Nginx directory for the logs
+
+networks:
+  net-local:
+    driver: bridge
+  net-federation:
+
+services:
+
+  RawEngine:
+    image: "sambuc/hbp-raw-engine"
+    container_name: "raw-engine"
+    networks:
+     - "net-local"
+    volumes:
+     - "${raw_data_root}:${docker_data_folder}:ro"
+
+  RawSniffer:
+    image: "sambuc/hbp-raw-sniffer"
+    container_name: "raw-sniffer"
+    networks:
+     - "net-local"
+    expose:
+     - "5555"
+    volumes:
+     - "${raw_data_root}:${docker_data_folder}:ro"
+    links:
+     - "RawEngine:raw-engine"
+
+  RawAdvisor:
+    image: "google/cadvisor:latest"
+    container_name: "raw-cadvisor"
+    networks:
+     - "net-local"
+    expose:
+     - "8080"
+    volumes:
+     - "/:/rootfs:ro"
+     - "/var/run:/var/run:rw"
+     - "/sys:/sys:ro"
+     - "/var/lib/docker/:/var/lib/docker:ro"
+
+  RawAdmin:
+    image: "sambuc/hbp-raw-admin"
+    container_name: "raw-admin"
+    networks:
+     - "net-local"
+    ports:
+     - "80:80"
+    volumes:
+     - "${raw_admin_static}:/usr/share/nginx/html:ro"
+     - "${raw_admin_conf}:/etc/nginx:ro"
+     - "${raw_admin_log}:/var/log/nginx:rw"
+    links:
+     - "RawEngine:raw-engine"
+     - "RawSniffer:raw-sniffer"
+     - "RawAdvisor:raw-cadvisor"
