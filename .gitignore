@@ -1,1 +1,5 @@
 *.log
+data/
+doc/html/
+raw-admin/conf/.htpasswd
+docker-compose-node*.yml
