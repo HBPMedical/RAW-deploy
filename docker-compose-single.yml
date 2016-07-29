@@ -17,6 +17,7 @@ services:
   RawEngine:
     image: "sambuc/hbp-raw-engine"
     container_name: "raw-engine"
+    restart: unless-stopped
     networks:
      - "net-local"
     expose:
@@ -27,6 +28,7 @@ services:
   RawSniffer:
     image: "sambuc/hbp-raw-sniffer"
     container_name: "raw-sniffer"
+    restart: unless-stopped
     networks:
      - "net-local"
     expose:
@@ -39,6 +41,7 @@ services:
   RawAdvisor:
     image: "google/cadvisor:latest"
     container_name: "raw-cadvisor"
+    restart: unless-stopped
     networks:
      - "net-local"
     expose:
@@ -52,6 +55,7 @@ services:
   RawAdmin:
     image: "sambuc/hbp-raw-admin"
     container_name: "raw-admin"
+    restart: unless-stopped
     networks:
      - "net-local"
     ports:

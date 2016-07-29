@@ -20,6 +20,7 @@ services:
   SWARMNODE-RawEngine:
     image: "sambuc/hbp-raw-engine"
     container_name: "${swarm_node}-raw-engine"
+    restart: unless-stopped
     networks:
      - "net-local"
     expose:
@@ -32,6 +33,7 @@ services:
   SWARMNODE-RawSniffer:
     image: "sambuc/hbp-raw-sniffer"
     container_name: "${swarm_node}-raw-sniffer"
+    restart: unless-stopped
     networks:
      - "net-local"
     environment:
@@ -46,6 +48,7 @@ services:
   SWARMNODE-RawAdvisor:
     image: "google/cadvisor:latest"
     container_name: "${swarm_node}-raw-cadvisor"
+    restart: unless-stopped
     networks:
      - "net-local"
     environment:
@@ -61,6 +64,7 @@ services:
   SWARMNODE-RawAdmin:
     image: "sambuc/hbp-raw-admin"
     container_name: "${swarm_node}-raw-admin"
+    restart: unless-stopped
     networks:
      - "net-local"
     environment:
