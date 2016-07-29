@@ -19,6 +19,8 @@ services:
     container_name: "raw-engine"
     networks:
      - "net-local"
+    expose:
+     - "54321"
     volumes:
      - "${raw_data_root}:${docker_data_folder}:ro"
 
