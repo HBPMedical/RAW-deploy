@@ -16,6 +16,10 @@ The following specific products have been chosen as they provide the services re
  * Docker Compose (Container deployment management)
  * Consul (Discovery service and key store)
 
+For extra confort, the following can be added:
+
+ * Shipyard (Web UI)
+
 # Platform Requirements
 
  1. Ubuntu server 16.04+ or RHEL 7.2+
@@ -56,6 +60,8 @@ Execute the following to be able to run the commands below:
 $ CONSULPORT=8500
 $ SLAVEPORT=2376
 $ MASTERPORT=3376
+# optionnaly
+$ SHIPYARDPORT=8080
 ```
 
 ## Docker Machine
@@ -115,6 +121,37 @@ Docker Machine simplify the provision of virtual machines which can run docker c
   ```shell
   $ curl $(docker-machine ip ks):$CONSULPORT/v1/catalog/nodes
   ```
+#### Shipyard (Web UI)
+
+This is installed in this tutorial on the same machines as the keystore, merely for simplification.
+
+1. Start the RethinkDB container.
+
+  ```shell
+  docker run -d --restart=unless-stopped -d \
+	    --name shipyard-rethinkdb \
+	    rethinkdb
+  ```
+
+2. Start the Shipyard container.
+
+  ```shell
+  docker run -d --restart=unless-stopped -d \
+	    --name shipyard-controller \
+	    --link shipyard-rethinkdb:rethinkdb \
+	    -v /var/lib/boot2docker:/certs:ro \
+	    -p $SHIPYARD:8080 \
+	    shipyard/shipyard:latest \
+	    server \
+	    --tls-ca-cert=/certs/ca.pem \
+	    --tls-cert=/certs/server.pem \
+	    --tls-key=/certs/server-key.pem \
+	    -d tcp://$(docker-machine ip $MANAGER):$MASTERPORT
+  ```
+
+3. Add Network port redirection in VirtualBox for the `ks` virtual machine, pointing to `$SHIPYARDPORT`.
+
+4. Connect to the Web UI and login with `admin` and `shipyard`.
 
 ### Master VM – without replication
 
