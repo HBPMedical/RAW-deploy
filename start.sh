@@ -1,6 +1,6 @@
 #!/bin/sh
 
-function usage() {
+usage() {
 cat <<EOT
 usage: $0 [-h|--help] (single|swarm target-node) <docker-compose command>
 	-h, --help: show this message and exit
