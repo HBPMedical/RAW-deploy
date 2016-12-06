@@ -18,14 +18,18 @@
 # USE OF THIS SOFTWARE.
 
 # Node-specific config:
+: ${pg_data_root:="${PWD}/pgdata"}
 : ${raw_data_root:="${PWD}/data"}
 : ${raw_admin_root:="${PWD}/raw-admin"}
-export raw_data_root raw_admin_root
+export pg_data_root raw_data_root raw_admin_root
 
 # Whole Swarm config
+export POSTGRES_USER=mip
+export POSTGRES_PASSWORD=s3cret
+
 export COMPOSE_PROJECT_NAME="mip"
 export docker_data_folder="/datasets"
 
-export raw_admin_static=${raw_admin_root}/static
-export raw_admin_conf=${raw_admin_root}/conf
+export raw_admin_conf=${raw_admin_root}/conf/nginx.conf
+export raw_admin_htpasswd=${raw_admin_root}/conf/.htpasswd
 export raw_admin_log=${raw_admin_root}/logs

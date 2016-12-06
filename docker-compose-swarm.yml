@@ -17,14 +17,18 @@
 # USE OF THIS SOFTWARE.
 
 version: '2'
-# the following environment variables are expected to be available when running 
+# the following environment variables are expected to be available when running
 # docker-compose up
 # - swarm_node: The name of the cluster node where to deploy
-# - raw_data_root: The folder containing the data on the swarm node host
-# - docker_data_folder: Where to map the data folder WITHIN the containers
-# - raw_admin_static: Nginx directory for the static pages and ressources
-# - raw_admin_conf: Nginx configuration directory
-# - raw_admin_log: Nginx directory for the logs
+# - raw_data_root:      The folder containing the data (CSV, json,...) on the
+#                       swarm node host
+# - docker_data_folder: Where to map the data (CSV, json, ...) folder WITHIN the
+#                       containers
+# - pg_data_root:       The folder containing the PostgreSQL binary tables on the
+#                       swarm node host
+# - raw_admin_conf:     Nginx configuration file
+# - raw_admin_htpasswd: .htpasswd configuration file
+# - raw_admin_log:      Nginx directory for the logs
 
 networks:
   net-local:
@@ -36,51 +40,63 @@ networks:
 services:
 
   SWARMNODE-RawEngine:
-    image: "sambuc/hbp-raw-engine"
+    image: "hbpmip/postgresraw"
     container_name: "${swarm_node}-raw-engine"
     restart: unless-stopped
     networks:
      - "net-local"
     expose:
-     - "54321"
+     - "5432"
     environment:
      - "constraint:node==${swarm_node}"
     volumes:
      - "${raw_data_root}:${docker_data_folder}:ro"
+     - "${pg_data_root}:/data:rw"
+    environment:
+     - POSTGRES_USER
+     - POSTGRES_PASSWORD
+     - POSTGRES_DB=mip
+     - PGDATA=/data/pgdata
 
-  SWARMNODE-RawSniffer:
-    image: "sambuc/hbp-raw-sniffer"
-    container_name: "${swarm_node}-raw-sniffer"
+  SWARMNODE-RawUI:
+    image: "hbpmip/postgresraw-ui"
+    container_name: "${swarm_node}-raw-ui"
     restart: unless-stopped
     networks:
      - "net-local"
     environment:
      - "constraint:node==${swarm_node}"
     expose:
+     - "54321"
      - "5555"
     volumes:
      - "${raw_data_root}:${docker_data_folder}:ro"
     links:
      - "SWARMNODE-RawEngine:raw-engine"
-
-  SWARMNODE-RawAdvisor:
-    image: "google/cadvisor:latest"
-    container_name: "${swarm_node}-raw-cadvisor"
-    restart: unless-stopped
-    networks:
-     - "net-local"
     environment:
-     - "constraint:node==${swarm_node}"
-    expose:
-     - "8080"
-    volumes:
-     - "/:/rootfs:ro"
-     - "/var/run:/var/run:rw"
-     - "/sys:/sys:ro"
-     - "/var/lib/docker/:/var/lib/docker:ro"
+     - POSTGRES_USER
+     - POSTGRES_PASSWORD
+     - POSTGRES_DB=mip
+     - POSTGRES_HOST=raw-engine
+
+#  SWARMNODE-RawAdvisor:
+#    image: "google/cadvisor:latest"
+#    container_name: "${swarm_node}-raw-cadvisor"
+#    restart: unless-stopped
+#    networks:
+#     - "net-local"
+#    environment:
+#     - "constraint:node==${swarm_node}"
+#    expose:
+#     - "8080"
+#    volumes:
+#     - "/:/rootfs:ro"
+#     - "/var/run:/var/run:rw"
+#     - "/sys:/sys:ro"
+#     - "/var/lib/docker/:/var/lib/docker:ro"
 
   SWARMNODE-RawAdmin:
-    image: "sambuc/hbp-raw-admin"
+    image: "library/nginx:alpine"
     container_name: "${swarm_node}-raw-admin"
     restart: unless-stopped
     networks:
@@ -90,10 +106,9 @@ services:
     ports:
      - "80:80"
     volumes:
-     - "${raw_admin_static}:/usr/share/nginx/html:ro"
-     - "${raw_admin_conf}:/etc/nginx:ro"
+     - "${raw_admin_htpasswd}:/etc/nginx/.htpasswd:ro"
+     - "${raw_admin_conf}:/etc/nginx/nginx.conf:ro"
      - "${raw_admin_log}:/var/log/nginx:rw"
     links:
-     - "SWARMNODE-RawEngine:raw-engine"
-     - "SWARMNODE-RawSniffer:raw-sniffer"
-     - "SWARMNODE-RawAdvisor:raw-cadvisor"
+     - "SWARMNODE-RawUI:raw-ui"
+#    - "SWARMNODE-RawAdvisor:raw-cadvisor"

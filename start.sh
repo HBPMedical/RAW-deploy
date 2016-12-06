@@ -28,7 +28,8 @@ usage: $0 [-h|--help] (single|swarm target-node) <docker-compose command>
 	<docker-compose command>: This is forwarded as is to docker-compose
 
 The following environment variables can be set to override defaults:
- - raw_data_root	Folder containing the data
+ - pg_data_root		Folder containing the PostgreSQL data
+ - raw_data_root	Folder containing the raw data
  - raw_admin_root	Folder containing the administration configuration
 
 Errors: This script will exit with the following error codes:
