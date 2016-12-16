@@ -47,8 +47,8 @@ fi
 . ./env.sh
 
 # If default value, make sure the container can write.
-if [ "${pg_data_root}" == "${PWD}/pgdata" ] ; then
-    chmod 777 pgdata
+if [ "${pg_data_root}" == "${PWD}/data" ] ; then
+    chmod 777 data
 fi
 
 case $1 in

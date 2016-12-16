@@ -18,8 +18,8 @@
 # USE OF THIS SOFTWARE.
 
 # Node-specific config:
-: ${pg_data_root:="${PWD}/pgdata"}
-: ${raw_data_root:="${PWD}/data"}
+: ${pg_data_root:="${PWD}/data"}
+: ${raw_data_root:="${PWD}/datasets"}
 : ${raw_admin_root:="${PWD}/raw-admin"}
 export pg_data_root raw_data_root raw_admin_root
 
@@ -28,7 +28,8 @@ export POSTGRES_USER=mip
 export POSTGRES_PASSWORD=s3cret
 
 export COMPOSE_PROJECT_NAME="mip"
-export docker_data_folder="/datasets"
+export docker_pg_data_folder="/data"
+export docker_raw_data_folder="/datasets"
 
 export raw_admin_conf=${raw_admin_root}/conf/nginx.conf
 export raw_admin_htpasswd=${raw_admin_root}/conf/.htpasswd

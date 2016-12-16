@@ -21,10 +21,11 @@ version: '2'
 # docker-compose up
 # - raw_data_root:      The folder containing the data (CSV, json,...) on the
 #                       swarm node host
-# - docker_data_folder: Where to map the data (CSV, json, ...) folder WITHIN the
+# - docker_raw_data_folder: Where to map the data (CSV, json, ...) folder WITHIN the
 #                       containers
 # - pg_data_root:       The folder containing the PostgreSQL binary tables on the
 #                       swarm node host
+# - docker_pg_data_folder: Where to map the previous data folder WITHIN the containers
 # - raw_admin_conf:     Nginx configuration file
 # - raw_admin_htpasswd: .htpasswd configuration file
 # - raw_admin_log:      Nginx directory for the logs
@@ -45,13 +46,13 @@ services:
     expose:
      - "5432"
     volumes:
-     - "${raw_data_root}:${docker_data_folder}:ro"
-     - "${pg_data_root}:/data:rw"
+     - "${raw_data_root}:${docker_raw_data_folder}:ro"
+     - "${pg_data_root}:${docker_pg_data_folder}:rw"
     environment:
      - POSTGRES_USER
      - POSTGRES_PASSWORD
      - POSTGRES_DB=mip
-     - PGDATA=/data/pgdata
+     - PGDATA=${docker_pg_data_folder}/pgdata
 
   RawUI:
     image: "hbpmip/postgresraw-ui"
@@ -63,7 +64,8 @@ services:
      - "54321"
      - "5555"
     volumes:
-     - "${raw_data_root}:${docker_data_folder}:ro"
+     - "${raw_data_root}:${docker_raw_data_folder}:ro"
+     - "${pg_data_root}:${docker_pg_data_folder}:rw"
     links:
      - "RawEngine:raw-engine"
     environment:
@@ -71,6 +73,8 @@ services:
      - POSTGRES_PASSWORD
      - POSTGRES_DB=mip
      - POSTGRES_HOST=raw-engine
+     - docker_pg_data_folder
+     - docker_raw_data_folder
 
 #  RawAdvisor:
 #    image: "google/cadvisor:latest"
