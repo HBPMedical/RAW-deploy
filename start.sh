@@ -51,6 +51,13 @@ if [ "${pg_data_root}" == "${PWD}/data" ] ; then
     chmod 777 data
 fi
 
+# Make sure the container has access to the log files
+mkdir raw-admin/logs
+touch raw-admin/logs/access.log
+touch raw-admin/logs/error.log
+chmod 666 raw-admin/logs/access.log
+chmod 666 raw-admin/logs/error.log
+
 case $1 in
     -h|--help)
 	usage
