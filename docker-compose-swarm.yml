@@ -20,12 +20,10 @@ version: '2'
 # the following environment variables are expected to be available when running
 # docker-compose up
 # - swarm_node: The name of the cluster node where to deploy
-# - raw_data_root:      The folder containing the data (CSV, json,...) on the
-#                       swarm node host
-# - docker_data_folder: Where to map the data (CSV, json, ...) folder WITHIN the
-#                       containers
+# - raw_data_root:      The folder containing the data files (CSV, json,...) on the
+#                       swarm node host. Mapped to /datasets WITHIN the containers
 # - pg_data_root:       The folder containing the PostgreSQL binary tables on the
-#                       swarm node host
+#                       swarm node host. Mapped to /data WITHIN the containers
 # - raw_admin_conf:     Nginx configuration file
 # - raw_admin_htpasswd: .htpasswd configuration file
 # - raw_admin_log:      Nginx directory for the logs
@@ -50,9 +48,10 @@ services:
     environment:
      - "constraint:node==${swarm_node}"
     volumes:
-     - "${raw_data_root}:${docker_data_folder}:ro"
+     - "${raw_data_root}:/datasets:ro"
      - "${pg_data_root}:/data:rw"
     environment:
+     - POSTGRES_PORT
      - POSTGRES_USER
      - POSTGRES_PASSWORD
      - POSTGRES_DB=mip
@@ -67,17 +66,18 @@ services:
     environment:
      - "constraint:node==${swarm_node}"
     expose:
-     - "54321"
      - "5555"
     volumes:
-     - "${raw_data_root}:${docker_data_folder}:ro"
+     - "${raw_data_root}:/datasets:ro"
+     - "${pg_data_root}:/data:rw"
     links:
      - "SWARMNODE-RawEngine:raw-engine"
     environment:
+     - POSTGRES_HOST=raw-engine
+     - POSTGRES_PORT
      - POSTGRES_USER
      - POSTGRES_PASSWORD
      - POSTGRES_DB=mip
-     - POSTGRES_HOST=raw-engine
 
 #  SWARMNODE-RawAdvisor:
 #    image: "google/cadvisor:latest"
