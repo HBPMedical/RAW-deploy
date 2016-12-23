@@ -52,7 +52,7 @@ if [ "x${pg_data_root}" = "x${PWD}/data" ] ; then
 fi
 
 # Make sure the container has access to the log files
-mkdir raw-admin/logs
+test -d raw-admin/logs || mkdir raw-admin/logs
 touch raw-admin/logs/access.log
 touch raw-admin/logs/error.log
 chmod 666 raw-admin/logs/access.log

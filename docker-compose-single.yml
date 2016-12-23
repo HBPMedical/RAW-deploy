@@ -50,7 +50,6 @@ services:
      - POSTGRES_USER
      - POSTGRES_PASSWORD
      - POSTGRES_DB=mip
-     - PGDATA=/data/pgdata
 
   RawUI:
     image: "hbpmip/postgresraw-ui"
