@@ -48,7 +48,7 @@ fi
 
 # If default value, make sure the container can write.
 if [ "x${pg_data_root}" = "x${PWD}/data" ] ; then
-    chmod 777 data
+    sudo chmod 777 data
 fi
 
 # Make sure the container has access to the log files
