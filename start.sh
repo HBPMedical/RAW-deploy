@@ -22,6 +22,7 @@ cat <<EOT
 usage: $0 [-h|--help] (single|swarm target-node) <docker-compose command>
 	-h, --help: show this message and exit
 	single:	deploy on the local machine
+	unsecured: deploy on the local machine without user credential checks
 	swarm:	deploy on the node 'target-node' of the swarm cluster.
 		docker-compose uses the environment to contact the appropriate
 		docker daemon, so it must be correctly set.
@@ -84,6 +85,11 @@ case $1 in
     single)
 	shift
 	docker-compose -f docker-compose-single.yml $@
+	;;
+
+    unsecured)
+	shift
+	docker-compose -f docker-compose.yml $@
 	;;
 
     *)
