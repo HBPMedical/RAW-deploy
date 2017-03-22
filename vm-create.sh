@@ -19,7 +19,7 @@
 
 set -e
 CONSULPORT=8500
-SHIPYARDPORT=8080
+SHIPYARDPORT=9000
 SLAVEPORT=2376
 MASTERPORT=3376
 
@@ -73,13 +73,15 @@ done
 	    --name shipyard-controller \
 	    --link shipyard-rethinkdb:rethinkdb \
 	    -v /var/lib/boot2docker:/certs:ro \
-	    -p $SHIPYARD:8080 \
+	    -p 8080:8080 \
 	    shipyard/shipyard:latest \
 	    server \
 	    --tls-ca-cert=/certs/ca.pem \
 	    --tls-cert=/certs/server.pem \
 	    --tls-key=/certs/server-key.pem \
 	    -d tcp://$(docker-machine ip $MANAGER):$MASTERPORT
+
+	VBoxManage controlvm ks natpf1 "Shipyard,tcp,,$SHIPYARDPORT,,8080"
 )
 
 # Slaves
@@ -91,10 +93,26 @@ do
 	    --engine-label "eu.hbp.function=worker" \
 	    --engine-opt="cluster-store=consul://$(docker-machine ip $KEYSTORE):$CONSULPORT" \
 	    --engine-opt="cluster-advertise=eth1:$SLAVEPORT" $NODENAME
+
+	# / is mounted from a tmpfs, and PostgreSQL seems not like it for its
+	# log files. The only partition mounted in the VM is /mnt/sda1.
+	docker-machine ssh $NODENAME 'mkdir -p shared/data \
+		 && sudo chown 999 shared/data \
+		 && sudo mv shared /mnt/sda1/shared'
+
+	# Copy the proxy config, and create files for the logs with
+	# appropriate rights & owner.
+	docker-machine scp -r shared/raw-admin-$NODENAME $NODENAME:/mnt/sda1/shared/raw-admin
+	docker-machine ssh $NODENAME 'mkdir /mnt/sda1/shared/raw-admin/logs \
+		&& touch /mnt/sda1/shared/raw-admin/logs/access.log \
+		&& touch /mnt/sda1/shared/raw-admin/logs/error.log \
+		&& sudo chmod 666 /mnt/sda1/shared/raw-admin/logs/*.log'
+
+	# Copy the datasets which are accessible  and exposed by the node.
+	docker-machine scp -r shared/datasets-$NODENAME $NODENAME:/mnt/sda1/shared/datasets
+
 	eval $(docker-machine env $NODENAME)
 	docker run -d --name swarm-agent swarm join --addr=$(docker-machine ip $NODENAME):$SLAVEPORT \
 	    consul://$(docker-machine ip $KEYSTORE):$CONSULPORT
-	docker-machine scp -r raw-admin $NODENAME:
-	docker-machine scp -r data $NODENAME:
     )
 done

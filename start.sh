@@ -47,17 +47,18 @@ fi
 
 . ./env.sh
 
-# If default value, make sure the container can write.
-if [ "x${pg_data_root}" = "x${PWD}/data" ] ; then
-    sudo chmod 777 data
-fi
-
-# Make sure the container has access to the log files
-test -d raw-admin/logs || mkdir raw-admin/logs
-touch raw-admin/logs/access.log
-touch raw-admin/logs/error.log
-chmod 666 raw-admin/logs/access.log
-chmod 666 raw-admin/logs/error.log
+prepare_local_start() {
+	# If default value, make sure the container can write.
+	if [ "x${pg_data_root}" = "x${PWD}/data" ] ; then
+		sudo chmod 777 data
+	fi
+	# Make sure the container has access to the log files
+	test -d raw-admin/logs || mkdir raw-admin/logs
+	touch raw-admin/logs/access.log
+	touch raw-admin/logs/error.log
+	chmod 666 raw-admin/logs/access.log
+	chmod 666 raw-admin/logs/error.log
+}
 
 case $1 in
     -h|--help)
@@ -75,6 +76,16 @@ case $1 in
 		export swarm_node=$1
 		shift
 		sed -e "s,SWARMNODE,${swarm_node},g" docker-compose-swarm.yml > docker-compose-node-${swarm_node}.yml
+		# Adapt the environment variables which points to directories for data
+		raw_data_root=/mnt/sda1/shared/datasets
+		pg_data_root=/mnt/sda1/shared/data
+		raw_admin_root=/mnt/sda1/shared/raw-admin
+		raw_admin_conf=${raw_admin_root}/conf/nginx.conf
+		raw_admin_htpasswd=${raw_admin_root}/conf/.htpasswd
+		raw_admin_log=${raw_admin_root}/logs
+
+		# Source the node connection information so that the following actions are taken on the node, rather than the host.
+		eval $(docker-machine env ${swarm_node})
 		# If the node-only network doesn't exists, create it.
 		docker network ls | grep -q ${swarm_node}/mip_net-local || \
 			docker network create -d bridge ${swarm_node}/mip_net-local
@@ -84,11 +95,13 @@ case $1 in
 
     single)
 	shift
+	prepare_local_start
 	docker-compose -f docker-compose-single.yml $@
 	;;
 
     unsecured)
 	shift
+	prepare_local_start
 	docker-compose -f docker-compose.yml $@
 	;;
 
