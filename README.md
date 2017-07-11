@@ -20,7 +20,7 @@ The env.sh configuration file sets these two environment variables respectively 
 
 2. Clone this repository:
   ```!sh
-  git clone https://github.com/HBPSP8Repo/RAW-deploy.git
+  git clone https://github.com/HBPMedical/RAW-deploy.git
   ```
 
 3. Generate an ```raw-admin/conf/.htpasswd``` file:
