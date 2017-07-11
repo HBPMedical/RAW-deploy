@@ -1,4 +1,4 @@
-#                    Copyright (c) 2016-2016
+#                    Copyright (c) 2016-2017
 #   Data Intensive Applications and Systems Labaratory (DIAS)
 #            Ecole Polytechnique Federale de Lausanne
 #
@@ -71,20 +71,6 @@ services:
      - POSTGRES_PASSWORD
      - POSTGRES_DB=mip
 
-#  RawAdvisor:
-#    image: "google/cadvisor:latest"
-#    container_name: "raw-cadvisor"
-#    restart: unless-stopped
-#    networks:
-#     - "net-local"
-#    expose:
-#     - "8080"
-#    volumes:
-#     - "/:/rootfs:ro"
-#     - "/var/run:/var/run:rw"
-#     - "/sys:/sys:ro"
-#     - "/var/lib/docker/:/var/lib/docker:ro"
-
   RawAdmin:
     image: "library/nginx:alpine"
     container_name: "raw-admin"
@@ -99,4 +85,3 @@ services:
      - "${raw_admin_log}:/var/log/nginx:rw"
     links:
      - "RawUI:raw-ui"
-#    - "RawAdvisor:raw-cadvisor"

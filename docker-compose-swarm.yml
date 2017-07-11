@@ -1,4 +1,4 @@
-#                    Copyright (c) 2016-2016
+#                    Copyright (c) 2016-2017
 #   Data Intensive Applications and Systems Labaratory (DIAS)
 #            Ecole Polytechnique Federale de Lausanne
 #
@@ -19,7 +19,7 @@
 version: '2'
 # the following environment variables are expected to be available when running
 # docker-compose up
-# - swarm_node: The name of the cluster node where to deploy
+# - swarm_node:		The name of the cluster node where to deploy
 # - raw_data_root:      The folder containing the data files (CSV, json,...) on the
 #                       swarm node host. Mapped to /datasets WITHIN the containers
 # - pg_data_root:       The folder containing the PostgreSQL binary tables on the
@@ -78,22 +78,6 @@ services:
      - POSTGRES_PASSWORD
      - POSTGRES_DB=mip
 
-#  SWARMNODE-RawAdvisor:
-#    image: "google/cadvisor:latest"
-#    container_name: "${swarm_node}-raw-cadvisor"
-#    restart: unless-stopped
-#    networks:
-#     - "net-local"
-#    environment:
-#     - "constraint:node==${swarm_node}"
-#    expose:
-#     - "8080"
-#    volumes:
-#     - "/:/rootfs:ro"
-#     - "/var/run:/var/run:rw"
-#     - "/sys:/sys:ro"
-#     - "/var/lib/docker/:/var/lib/docker:ro"
-
   SWARMNODE-RawAdmin:
     image: "library/nginx:alpine"
     container_name: "${swarm_node}-raw-admin"
@@ -110,4 +94,3 @@ services:
      - "${raw_admin_log}:/var/log/nginx:rw"
     links:
      - "SWARMNODE-RawUI:raw-ui"
-#    - "SWARMNODE-RawAdvisor:raw-cadvisor"
